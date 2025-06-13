@@ -24,7 +24,7 @@ const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v11',
     center: [-2.4370, 50.7155],  // Coordinates for Dorchester, Dorset
-    zoom: 8, // initial zoom level 0 = entire world, 22(max) = individual buildings
+    zoom: 9, // initial zoom level. 0 = entire world, 22(max) = individual buildings
     projection: 'globe',
     maxZoom: 10
 });
@@ -68,7 +68,7 @@ function buildSpoke(foodbanks, point) {
     let nearestFoodbankLines = turf.featureCollection([]);
     let cleanedFoodbanks = JSON.parse(JSON.stringify(foodbanks));
 
-    for (let i=1;i<=10;i++) {
+    for (let i=1;i<=5;i++) {  // the number of spokes
         const nearest = turf.nearestPoint(point, cleanedFoodbanks);
         const startLng = point.geometry.coordinates[0];
         const endLng = nearest.geometry.coordinates[0];
@@ -130,12 +130,14 @@ function addLayers(foodbanks, nearest, route) {
                 'interpolate',
                 ['linear'],
                 ['zoom'],
-                0,
-                0.5,
-                3,
-                4,
-                7,
-                8
+                0,  // zoom level
+                0.5,  // width at zoom level 0
+                3,  // zoom level
+                4,  // width at zoom level 3
+                7,  // zoom level
+                8,  // width at zoom level 7
+                8,  // zoom level
+                4   // width at zoom level 8
             ]
         }
     });
