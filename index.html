@@ -23,19 +23,19 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY29tcGxleC10b3A2NDY4IiwiYSI6ImNtYnV1YmM5YTBmY
 const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v11',
-    center: [0, 40],
-    zoom: 3,
+    center: [-2.4370, 50.7155],  // Coordinates for Dorchester, Dorset
+    zoom: 8, // initial zoom level 0 = entire world, 22(max) = individual buildings
     projection: 'globe',
-    maxZoom: 6
+    maxZoom: 10
 });
 
 map.on('load', () => {
-    let airports;
+    let foodbanks;
 
     map.once('idle', () => {
         d3.json("https://www.givefood.org.uk/api/2/locations?format=geojson", function (d) {
-            airports = d;
-            getSpoke(airports);
+            foodbanks = d;
+            getSpoke(foodbanks);
         });
         // airport data:
         // d3.json("./data/airport.json", function (d) {
@@ -51,24 +51,24 @@ map.on('load', () => {
 
         // use map center
         map.on('move', () => {
-            getSpoke(airports);
+            getSpoke(foodbanks);
         });
     });
 });
 
-function getSpoke(airports) {
+function getSpoke(foodbanks) {
     const center = map.getCenter();
     const newPoint = turf.point([center.lng, center.lat]);
-    buildSpoke(airports, newPoint);
+    buildSpoke(foodbanks, newPoint);
 }
 
-function buildSpoke(airports, point) {
-    let nearestAirports = turf.featureCollection([]);
-    let nearestAirportLines = turf.featureCollection([]);
-    let cleanedAirports = JSON.parse(JSON.stringify(airports));
+function buildSpoke(foodbanks, point) {
+    let nearestFoodbanks = turf.featureCollection([]);
+    let nearestFoodbankLines = turf.featureCollection([]);
+    let cleanedFoodbanks = JSON.parse(JSON.stringify(foodbanks));
 
     for (let i=1;i<=10;i++) {
-        const nearest = turf.nearestPoint(point, cleanedAirports);
+        const nearest = turf.nearestPoint(point, cleanedFoodbanks);
         const startLng = point.geometry.coordinates[0];
         const endLng = nearest.geometry.coordinates[0];
         
@@ -80,29 +80,29 @@ function buildSpoke(airports, point) {
 
         const nearestLine = turf.lineString([point.geometry.coordinates, nearest.geometry.coordinates]);
         
-        nearestAirports.features.push(nearest);
-        nearestAirportLines.features.push(nearestLine);
+        nearestFoodbanks.features.push(nearest);
+        nearestFoodbankLines.features.push(nearestLine);
 
-        const index = cleanedAirports.features.findIndex(n => n.properties.name === nearest.properties.name)
+        const index = cleanedFoodbanks.features.findIndex(n => n.properties.name === nearest.properties.name)
         if (index !== -1) {
-            cleanedAirports.features.splice(index, 1);
+            cleanedFoodbanks.features.splice(index, 1);
         }
     }
 
     if (initLoad) {
-        addLayers(airports, nearestAirports, nearestAirportLines);
+        addLayers(foodbanks, nearestFoodbanks, nearestFoodbankLines);
     } else {
-        map.getSource('newPoint').setData(nearestAirports);
-        map.getSource('newLine').setData(nearestAirportLines);
+        map.getSource('newPoint').setData(nearestFoodbanks);
+        map.getSource('newLine').setData(nearestFoodbankLines);
     }
 }
 
-function addLayers(airports, nearest, route) {
+function addLayers(foodbanks, nearest, route) {
     initLoad = false;
 
     map.addSource('points', {
         'type': 'geojson',
-        'data': airports
+        'data': foodbanks
     });
 
     map.addSource('newPoint', {
@@ -132,7 +132,9 @@ function addLayers(airports, nearest, route) {
                 0,
                 0.5,
                 3,
-                4
+                4,
+                7,
+                8
             ]
         }
     });
