@@ -33,10 +33,11 @@ map.on('load', () => {
     let foodbanks;
 
     map.once('idle', () => {
-        d3.json("https://www.givefood.org.uk/api/2/locations?format=geojson", function (d) {
+        d3.json("./data/foodbanks.json", function (d) {
             foodbanks = d;
             getSpoke(foodbanks);
-        });
+    });
+
         // airport data:
         // d3.json("./data/airport.json", function (d) {
         //     airports = d;
