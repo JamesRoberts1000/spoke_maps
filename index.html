@@ -33,10 +33,15 @@ map.on('load', () => {
     let airports;
 
     map.once('idle', () => {
-        d3.json("./data/airport.json", function (d) {
+        d3.json("https://www.givefood.org.uk/api/2/locations?format=geojson", function (d) {
             airports = d;
             getSpoke(airports);
         });
+        // airport data:
+        // d3.json("./data/airport.json", function (d) {
+        //     airports = d;
+        //     getSpoke(airports);
+        // });
 
         // use mouse location
         // map.on('mousemove', (e) => {
