@@ -2,6 +2,8 @@
 
 This project is based on [willymaps/spoke](https://github.com/willymaps/spoke) and has been adapted to visualize foodbank networks in the UK.
 
+View the map: https://jamesroberts1000.github.io/spoke_maps/
+
 ## Description
 
 This interactive web map visualizes foodbank locations using a hub and spoke pattern. The visualization shows connections between a central point and the nearest foodbanks, helping to understand the distribution and accessibility of foodbanks in different areas.
@@ -10,7 +12,7 @@ This interactive web map visualizes foodbank locations using a hub and spoke pat
 
 - Interactive map centered on Dorchester, Dorset
 - Dynamic hub and spoke visualization
-- Shows 5 nearest foodbanks to any center point
+- Shows 8 nearest foodbanks to any center point
 - Automatically updates as you move the map
 - Responsive line widths based on zoom level
 
