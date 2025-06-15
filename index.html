@@ -162,6 +162,27 @@ function addLayers(foodbanks, nearest, route) {
         }
     });
 
+    // Add popup on click
+    map.on('click', 'globe-points', function (e) {
+        const props = e.features[0].properties;
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const popupContent = `<strong>${props.name}</strong><br>${props.address}<br><a href="${props.url}" target="_blank">Website</a>`;
+
+        new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(popupContent)
+            .addTo(map);
+    });
+
+    // Change cursor to pointer when hovering over points
+    map.on('mouseenter', 'globe-points', function () {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', 'globe-points', function () {
+        map.getCanvas().style.cursor = '';
+    });
+
     map.addLayer({
         'id': 'globe-newPoint',
         'type': 'circle',
