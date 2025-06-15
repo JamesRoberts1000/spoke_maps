@@ -11,6 +11,20 @@
 <style>
 body { margin: 0; padding: 0; }
 #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+
+/* Style for the mini hover tooltip */
+.mini-tooltip .mapboxgl-popup-content {
+    padding: 4px 8px;
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+.mini-tooltip .mapboxgl-popup-tip {
+    border-top-color: rgba(0, 0, 0, 0.7);
+}
 </style>
 </head>
 <body>
@@ -162,6 +176,33 @@ function addLayers(foodbanks, nearest, route) {
         }
     });
 
+    // Change cursor and show mini-tooltip on hover
+    let hoverPopup = null;
+    map.on('mouseenter', 'globe-points', function (e) {
+        map.getCanvas().style.cursor = 'pointer';
+        
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const name = e.features[0].properties.name;
+
+        // Create a new popup
+        hoverPopup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            className: 'mini-tooltip'
+        })
+            .setLngLat(coordinates)
+            .setHTML(`<div>${name}</div>`)
+            .addTo(map);
+    });
+
+    map.on('mouseleave', 'globe-points', function () {
+        map.getCanvas().style.cursor = '';
+        if (hoverPopup) {
+            hoverPopup.remove();
+            hoverPopup = null;
+        }
+    });
+
     // Add popup on click
     map.on('click', 'globe-points', function (e) {
         const props = e.features[0].properties;
@@ -172,15 +213,6 @@ function addLayers(foodbanks, nearest, route) {
             .setLngLat(coordinates)
             .setHTML(popupContent)
             .addTo(map);
-    });
-
-    // Change cursor to pointer when hovering over points
-    map.on('mouseenter', 'globe-points', function () {
-        map.getCanvas().style.cursor = 'pointer';
-    });
-
-    map.on('mouseleave', 'globe-points', function () {
-        map.getCanvas().style.cursor = '';
     });
 
     map.addLayer({
