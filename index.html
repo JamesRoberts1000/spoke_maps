@@ -68,7 +68,7 @@ function buildSpoke(foodbanks, point) {
     let nearestFoodbankLines = turf.featureCollection([]);
     let cleanedFoodbanks = JSON.parse(JSON.stringify(foodbanks));
 
-    for (let i=1;i<=5;i++) {  // the number of spokes
+    for (let i=1;i<=8;i++) {  // the number of spokes
         const nearest = turf.nearestPoint(point, cleanedFoodbanks);
         const startLng = point.geometry.coordinates[0];
         const endLng = nearest.geometry.coordinates[0];
@@ -125,7 +125,7 @@ function addLayers(foodbanks, nearest, route) {
             'line-cap': 'round'
         },
         'paint': {
-            'line-color': 'red',
+            'line-color': '#FAB622',
             'line-width': [
                 'interpolate',
                 ['linear'],
@@ -178,7 +178,7 @@ function addLayers(foodbanks, nearest, route) {
             ],
             'circle-opacity': 1,
             'circle-blur': 0,
-            'circle-color': 'red'
+            'circle-color': '#035690'
         }
     });
 }
