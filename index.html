@@ -54,6 +54,107 @@ body { margin: 0; padding: 0; }
 .mini-tooltip .mapboxgl-popup-tip {
     border-top-color: rgba(0, 0, 0, 0.7);
 }
+
+/* Welcome Modal Styles */
+#welcomeModal {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 300px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    z-index: 2;
+    transition: all 0.3s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+#welcomeModal.hidden {
+    display: none;
+}
+
+#welcomeModal.minimized {
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e2e8f0;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.modal-content {
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    padding: 0 20px 20px;
+}
+
+.modal-button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.minimize-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #666;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #666;
+}
+
+#infoButton {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    font-size: 20px;
+    color: #2c3e50;
+}
+
+#infoButton:hover {
+    background: #f5f5f5;
+}
 </style>
 </head>
 <body>
@@ -61,6 +162,28 @@ body { margin: 0; padding: 0; }
     <h1>UK Foodbank Network</h1>
     <span>Visualising connections to nearest foodbanks</span>
 </div>
+
+<div id="welcomeModal">
+    <div class="modal-header">
+        <h2>Welcome to UK Foodbank Network</h2>
+        <div>
+            <button class="minimize-btn" onclick="minimizeModal()">−</button>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+    </div>
+    <div class="modal-content">
+        <p>This map visualizes the UK's foodbank network using a hub and spoke pattern. Here's how to use it:</p>
+        <ul>
+            <li>The map center (hub) connects to the 8 nearest foodbanks</li>
+            <li>Pan the map to see connections update dynamically</li>
+            <li>Hover over points to see foodbank names</li>
+            <li>Click points for detailed information</li>
+        </ul>
+    </div>
+</div>
+
+<button id="infoButton" onclick="showModal()">ℹ️</button>
+
 <div id="map"></div>
 <script>
 
@@ -74,6 +197,29 @@ const map = new mapboxgl.Map({
     zoom: 9, // initial zoom level. 0 = entire world, 22(max) = individual buildings
     projection: 'globe',
     maxZoom: 10
+});
+
+// Modal functionality
+function closeModal() {
+    document.getElementById('welcomeModal').classList.add('hidden');
+    document.getElementById('infoButton').style.display = 'flex';
+}
+
+function minimizeModal() {
+    document.getElementById('welcomeModal').classList.add('minimized');
+}
+
+function showModal() {
+    const modal = document.getElementById('welcomeModal');
+    modal.classList.remove('hidden', 'minimized');
+    document.getElementById('infoButton').style.display = 'none';
+}
+
+// Restore modal when clicking minimized version
+document.getElementById('welcomeModal').addEventListener('click', function(e) {
+    if (this.classList.contains('minimized')) {
+        showModal();
+    }
 });
 
 map.on('load', () => {
@@ -268,6 +414,29 @@ function addLayers(foodbanks, nearest, route) {
         }
     });
 }
+
+// Welcome Modal functionality
+const welcomeModal = document.getElementById('welcomeModal');
+const infoButton = document.getElementById('infoButton');
+const closeModalButton = document.querySelector('.close-btn');
+const minimizeModalButton = document.getElementById('minimizeModalButton');
+const gotItButton = document.getElementById('gotItButton');
+
+infoButton.addEventListener('click', () => {
+    welcomeModal.classList.remove('hidden');
+});
+
+closeModalButton.addEventListener('click', () => {
+    welcomeModal.classList.add('hidden');
+});
+
+minimizeModalButton.addEventListener('click', () => {
+    welcomeModal.classList.toggle('minimized');
+});
+
+gotItButton.addEventListener('click', () => {
+    welcomeModal.classList.add('hidden');
+});
 </script>
 </body>
 </html>
