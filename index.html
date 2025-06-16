@@ -8,6 +8,49 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.0-beta.2/mapbox-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <script src="https://d3js.org/d3.v4.min.js"></script>
+<!-- Modal Control Script -->
+<script>
+// Only run this script after the page is fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // First check if all our elements exist
+    const welcomeModal = document.getElementById('welcomeModal');
+    const minimizeModalButton = document.getElementById('minimizeModalButton');
+    const closeModalButton = document.getElementById('closeModalButton');
+    const infoButton = document.getElementById('infoButton');
+
+    // Debug log to check if elements are found
+    console.log('Modal elements found:', {
+        welcomeModal: !!welcomeModal,
+        minimizeModalButton: !!minimizeModalButton,
+        closeModalButton: !!closeModalButton,
+        infoButton: !!infoButton
+    });
+
+    // Only set up event listeners if all required elements exist
+    if (welcomeModal && minimizeModalButton && closeModalButton && infoButton) {
+        // Minimize button
+        minimizeModalButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            welcomeModal.classList.toggle('minimized');
+            minimizeModalButton.textContent = welcomeModal.classList.contains('minimized') ? '+' : '−';
+        });
+
+        // Close button
+        closeModalButton.addEventListener('click', function() {
+            welcomeModal.classList.add('hidden');
+            infoButton.style.display = 'flex';
+        });
+
+        // Info button
+        infoButton.addEventListener('click', function() {
+            welcomeModal.classList.remove('hidden', 'minimized');
+            this.style.display = 'none';
+            minimizeModalButton.textContent = '−';
+        });
+    } else {
+        console.error('Some modal elements are missing. Modal functionality will not work.');
+    }
+});</script>
 <style>
 body { margin: 0; padding: 0; }
 #map { position: absolute; top: 40px; bottom: 0; width: 100%; }
@@ -61,23 +104,81 @@ body { margin: 0; padding: 0; }
     top: 60px;
     right: 20px;
     width: 300px;
+    height: auto;
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     z-index: 2;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    overflow: hidden;
+}
+
+#welcomeModal.minimized {
+    width: 300px !important;
+    height: auto !important;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
+#welcomeModal.minimized .modal-content,
+#welcomeModal.minimized .close-btn {
+    display: none !important;
+}
+
+/* Do NOT hide the header text in minimized state */
+
+#welcomeModal.minimized .modal-header {
+    padding: 15px 20px;
+    border: none;
+    height: 56px;
+    min-height: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e2e8f0;
+    margin: 0;
+    border-radius: 8px 8px 0 0;
 }
 
 #welcomeModal.hidden {
     display: none;
 }
 
-#welcomeModal.minimized {
-    width: 40px;
-    height: 40px;
-    overflow: hidden;
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e2e8f0;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.modal-content {
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.minimize-btn, .close-btn {
+    background: none;
+    border: none;
     cursor: pointer;
+    padding: 4px 8px;
+    font-size: 16px;
+    color: #666;
+}
+
+.minimize-btn:hover, .close-btn:hover {
+    color: #000;
 }
 
 .modal-header {
@@ -167,8 +268,8 @@ body { margin: 0; padding: 0; }
     <div class="modal-header">
         <h2>Welcome to UK Foodbank Network</h2>
         <div>
-            <button class="minimize-btn" onclick="minimizeModal()">−</button>
-            <button class="close-btn" onclick="closeModal()">×</button>
+            <button class="minimize-btn" id="minimizeModalButton">−</button>
+            <button class="close-btn" id="closeModalButton">×</button>
         </div>
     </div>
     <div class="modal-content">
@@ -182,9 +283,11 @@ body { margin: 0; padding: 0; }
     </div>
 </div>
 
-<button id="infoButton" onclick="showModal()">ℹ️</button>
+<button id="infoButton">ℹ️</button>
 
 <div id="map"></div>
+
+<!-- Map Script -->
 <script>
 
 let initLoad = true;
@@ -199,15 +302,7 @@ const map = new mapboxgl.Map({
     maxZoom: 10
 });
 
-// Modal functionality
-function closeModal() {
-    document.getElementById('welcomeModal').classList.add('hidden');
-    document.getElementById('infoButton').style.display = 'flex';
-}
-
-function minimizeModal() {
-    document.getElementById('welcomeModal').classList.add('minimized');
-}
+// Map functionality will continue here
 
 function showModal() {
     const modal = document.getElementById('welcomeModal');
@@ -217,10 +312,17 @@ function showModal() {
 
 // Restore modal when clicking minimized version
 document.getElementById('welcomeModal').addEventListener('click', function(e) {
-    if (this.classList.contains('minimized')) {
+    // Only restore if minimized and NOT clicking the minimize button
+    if (
+        this.classList.contains('minimized') &&
+        e.target.id !== 'minimizeModalButton' &&
+        !e.target.classList.contains('minimize-btn')
+    ) {
         showModal();
     }
 });
+
+// Map initialization will start here
 
 map.on('load', () => {
     let foodbanks;
@@ -415,28 +517,7 @@ function addLayers(foodbanks, nearest, route) {
     });
 }
 
-// Welcome Modal functionality
-const welcomeModal = document.getElementById('welcomeModal');
-const infoButton = document.getElementById('infoButton');
-const closeModalButton = document.querySelector('.close-btn');
-const minimizeModalButton = document.getElementById('minimizeModalButton');
-const gotItButton = document.getElementById('gotItButton');
-
-infoButton.addEventListener('click', () => {
-    welcomeModal.classList.remove('hidden');
-});
-
-closeModalButton.addEventListener('click', () => {
-    welcomeModal.classList.add('hidden');
-});
-
-minimizeModalButton.addEventListener('click', () => {
-    welcomeModal.classList.toggle('minimized');
-});
-
-gotItButton.addEventListener('click', () => {
-    welcomeModal.classList.add('hidden');
-});
+// Map initialization complete
 </script>
 </body>
 </html>
